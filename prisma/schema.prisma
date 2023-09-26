@@ -130,9 +130,9 @@ model shared_medical_records {
 model users {
   id                                               Int                      @id @default(autoincrement())
   name                                             String                   @db.VarChar(255)
+  role_id                                          Int
   email                                            String                   @db.VarChar(255)
   password                                         String                   @db.VarChar(255)
-  role_id                                          Int
   age                                              Int?
   date_of_birth                                    DateTime?                @db.Date
   blood_group                                      String?                  @db.VarChar(20)
@@ -141,6 +141,9 @@ model users {
   about                                            String?                  @db.Text
   phone                                            String?                  @db.VarChar(11)
   gender                                           users_gender?
+  is_verified                                      Int?                     @default(0) @db.TinyInt
+  otp                                              Int?
+  otp_sent_at                                      DateTime?                @db.DateTime(0) @default(now())
   created_at                                       DateTime?                @default(now()) @db.Timestamp(0)
   appointment_doctors                              appointment_doctors[]
   appointment_patients                             appointment_patients[]
