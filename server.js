@@ -9,9 +9,16 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cors());
 
+//Import Routes
+
+const userRoutes = require("./routes/authRoutes");
+
+//Use Routes
+app.use("/api/auth", userRoutes);
+
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.SERVER_PORT || 5000;
 
 prisma.$connect()
   .then(() => {
