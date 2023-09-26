@@ -30,8 +30,10 @@ async function loginUser(req, res) {
     console.log(error);
     res.status(500).json({error: error.message});
   }
+}
 
-
+async function registerUser(req,res) {
+  const {name, email, phone, address, password, confirm_password} = req.body;
 }
 
 module.exports = {

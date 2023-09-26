@@ -139,7 +139,7 @@ model users {
   height                                           Int?
   weight                                           Decimal?                 @db.Decimal(3, 2)
   about                                            String?                  @db.Text
-  phone                                            String?                  @db.VarChar(11)
+  address                                          String?                  @db.Text
   gender                                           users_gender?
   is_verified                                      Int?                     @default(0) @db.TinyInt
   otp                                              Int?
@@ -150,6 +150,7 @@ model users {
   doctor_reviews_doctor_reviews_doctor_idTousers   doctor_reviews[]         @relation("doctor_reviews_doctor_idTousers")
   doctor_reviews_doctor_reviews_patient_idTousers  doctor_reviews[]         @relation("doctor_reviews_patient_idTousers")
   medical_records                                  medical_records[]
+  phone_numbers                                    phone_numbers[]
   prescriptions_prescriptions_prescribed_byTousers prescriptions[]          @relation("prescriptions_prescribed_byTousers")
   prescriptions_prescriptions_prescribed_toTousers prescriptions[]          @relation("prescriptions_prescribed_toTousers")
   shared_medical_records                           shared_medical_records[]
@@ -188,15 +189,25 @@ model doctor_reviews {
 
 model time_slots {
   id           Int       @id @default(autoincrement())
-  doctor_id    Int?
+  doctor_id    Int
   start_time   DateTime? @db.DateTime(0)
   end_time     DateTime? @db.DateTime(0)
   day          String?   @db.VarChar(10)
   is_available Int?      @default(1) @db.TinyInt
   created_at   DateTime? @default(now()) @db.Timestamp(0)
-  users        users?    @relation(fields: [doctor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "time_slots_ibfk_1")
+  users        users     @relation(fields: [doctor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "time_slots_ibfk_1")
 
   @@index([doctor_id], map: "doctor_id")
+}
+
+model phone_numbers {
+  id           Int    @id @default(autoincrement())
+  country_code String @db.VarChar(5)
+  phone        String @db.VarChar(15)
+  user_id      Int
+  users        users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "phone_numbers_ibfk_1")
+
+  @@index([user_id], map: "user_id")
 }
 
 enum appointments_type {
