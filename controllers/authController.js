@@ -1,8 +1,31 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const bcrypt = require("bcryptjs");
 
 async function loginUser(req, res) {
-  res.send("Login route");
+  const {email, password} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(404).json({error: "Invalid Credentials"});
+
+    const passwordMatched = await bcrypt.compare(password, user.password);
+
+    if(!passwordMatched) {
+      return res.status(400).json({error: "Invalid Credentials"});
+    }
+
+    res.status(200).json(user);
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({error: error.message});
+  }
 
 
 }
