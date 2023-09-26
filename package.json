@@ -1,0 +1,19 @@
+{
+  "name": "vsight-patient-portal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node seeder.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prisma": "^5.3.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.3.1"
+  }
+}
