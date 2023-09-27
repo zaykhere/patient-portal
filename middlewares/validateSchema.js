@@ -1,12 +1,11 @@
 const validateSchema =
   (schema) =>
   async (req, res, next) => {
-    try {
-      await schema.parseAsync(req.body);
-      return next();
-    } catch (error) {
-      return res.status(400).json({error: error?.issues?.[0]?.message});
-    }
+    const {error} = schema.validate(req.body);
+
+    if(error) return res.status(400).json({ error: error?.details?.[0]?.message });
+
+    return next();
   };
 
   module.exports = validateSchema;

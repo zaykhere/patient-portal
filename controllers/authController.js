@@ -34,8 +34,11 @@ async function loginUser(req, res) {
 
 async function registerUser(req,res) {
   const {name, email, phone, address, password, confirm_password} = req.body;
+
+  res.send("register route");
 }
 
 module.exports = {
-  loginUser
+  loginUser,
+  registerUser
 }
