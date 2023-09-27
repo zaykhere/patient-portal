@@ -94,7 +94,46 @@ async function registerPatient(req,res) {
   }
 }
 
+async function verifyOtp(req,res) {
+  const {otp, email} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(400).json({error: "User not found"});
+
+    if(user.otp == otp) {
+      await prisma.users.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          is_verified: 1
+        }
+      })
+
+      return res.status(200).json({
+        success: true,
+        token: generateToken(user.id)
+      })
+    }
+
+    else {
+      return res.status(400).json({error: "Invalid Otp"});
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({error: error.message});
+  }
+}
+
 module.exports = {
   loginUser,
-  registerPatient
+  registerPatient,
+  verifyOtp
 }
