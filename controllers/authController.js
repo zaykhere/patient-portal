@@ -106,6 +106,8 @@ async function verifyOtp(req,res) {
 
     if(!user) return res.status(400).json({error: "User not found"});
 
+    if(user.is_verified === 1) return res.status(400).json({error: "User already verified"});
+
     if(user.otp == otp) {
       await prisma.users.update({
         where: {
@@ -132,8 +134,46 @@ async function verifyOtp(req,res) {
   }
 }
 
+async function resendOtp(req,res) {
+  const {email} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(400).json({error: "User not found"});
+
+    if(user.is_verified === 1) return res.status(400).json({error: "User already verified"});
+
+    const otp = generateOtp();
+    const currentDate = new Date();
+
+    await prisma.users.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        otp: otp,
+        otp_sent_at: currentDate
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      otp: otp
+    })
+
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+}
+
 module.exports = {
   loginUser,
   registerPatient,
-  verifyOtp
+  verifyOtp,
+  resendOtp
 }
