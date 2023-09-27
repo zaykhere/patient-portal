@@ -2,6 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
 const generateToken = require('../utils/generateToken');
+const registerDto = require('../dtos/auth/registerDto');
+const generateOtp = require('../utils/generateOtp');
 
 async function loginUser(req, res) {
   const {email, password} = req.body;
@@ -32,13 +34,67 @@ async function loginUser(req, res) {
   }
 }
 
-async function registerUser(req,res) {
-  const {name, email, phone, address, password, confirm_password} = req.body;
+async function registerPatient(req,res) {
+  const {name, email, phone, address, password, confirm_password, country_code} = req.body;
 
-  res.send("register route");
+  try {
+    const userExists = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(userExists) return res.status(400).json({error: "User already exists"});
+
+    if(password !== confirm_password) return res.status(400).json({error: "Passwords don't match"});
+
+    let createdUser = null;
+    let createdUserRole = null;
+
+    const otp = generateOtp();
+    const currentDate = new Date();
+
+    await prisma.$transaction(async (tx) => {
+      createdUser = await tx.users.create({
+        data: {
+          email: email.trim(),
+          name: name.trim(),
+          otp: otp,
+          otp_sent_at: currentDate,
+          address: address ? address.trim() : null,
+          password: await bcrypt.hash(password, 10),
+          phone_numbers: {
+            create: {
+              country_code: country_code,
+              phone: phone
+            }
+          },
+          role_id: 1,
+        }
+      });
+
+      createdUserRole = await tx.users_roles.create({
+        data: {
+          role_id: 1,
+          user_id: createdUser.id
+        }
+      })
+
+    })
+
+    const response = registerDto(createdUser);
+
+    res.status(200).json({
+      success: true,
+      user: {...response, otp}
+    })
+
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
 }
 
 module.exports = {
   loginUser,
-  registerUser
+  registerPatient
 }
