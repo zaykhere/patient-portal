@@ -212,6 +212,12 @@ async function resendOtp(req,res) {
 }
 
 async function forgotPasswordRequest(req,res) {
+
+  if(!req.body.email) {
+    return res.status(400).json({
+      error: "Email is required"
+    })
+  }
   const {email} = req.body;
 
   try {
@@ -231,8 +237,8 @@ async function forgotPasswordRequest(req,res) {
         id: user.id
       },
       data: {
-        otp: otp,
-        otp_sent_at: currentDate
+        forgot_password_otp: otp,
+        forgot_otp_sent_at: currentDate
       }
     });
 
@@ -264,8 +270,8 @@ async function forgotPasswordRequest(req,res) {
   }
 }
 
-async function resetPassword(req,res) {
-  const {email, otp, password} = req.body;
+async function verifyForgotOtp(req,res) {
+  const {otp, email} = req.body;
 
   try {
     const user = await prisma.users.findFirst({
@@ -276,15 +282,28 @@ async function resetPassword(req,res) {
 
     if(!user) return res.status(400).json({error: "User not found"});
 
-    if(otp == user.otp) {
-      const updatedUser =  await prisma.users.update({
+    if(user.forgot_password_otp == otp) {
+      const updatedUser = await prisma.users.update({
         where: {
           id: user.id
         },
         data: {
-          password
+          is_forgot_otp_verified: 1
         }
       });
+
+      if(updatedUser) {
+        return res.status(200).json({
+          success: true,
+          message: "OTP verified successfully"
+        })
+      }
+
+      else {
+        return res.status(500).json({
+          error: "OTP could not be verified"
+        })
+      }
     }
 
     else {
@@ -296,10 +315,57 @@ async function resetPassword(req,res) {
   }
 }
 
+async function resetPassword(req,res) {
+  const {email, password, confirm_password} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(400).json({error: "User not found"});
+
+    if(password !== confirm_password) {
+      return res.status(400).json({error: "Passwords do not match"});
+    }
+
+      const updatedUser =  await prisma.users.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          password: await bcrypt.hash(password, 10)
+        }
+      });
+
+      if(updatedUser) {
+        return res.status(200).json({
+          success: true,
+          message: "Password updated successfully"
+        })
+      }
+
+      else {
+        return res.status(500).json({
+          success: true,
+          message: "Password could not be updated"
+        })
+      }
+    
+
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+}
+
 module.exports = {
   loginUser,
   registerPatient,
   verifyOtp,
   resendOtp,
-  forgotPasswordRequest
+  forgotPasswordRequest,
+  resetPassword,
+  verifyForgotOtp
 }
