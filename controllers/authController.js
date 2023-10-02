@@ -83,20 +83,28 @@ async function registerPatient(req,res) {
 
     })
 
-    const response = registerDto(createdUser);
+    const response = registerDto(createdUser);   
 
-    const mailSent = await sendMail(createdUser.email, 'OTP', otp);
+    if(createdUser && createdUserRole) {
+      const mailSent = await sendMail(createdUser.email, 'OTP', otp);
 
-    if(mailSent) {
-      res.status(200).json({
-        success: true,
-        user: response
-      })
+      if(mailSent) {
+        res.status(200).json({
+          success: true,
+          user: response
+        })
+      }
+
+      else {
+        res.status(500).json({
+          error: 'Failed to send email'
+        })
+      }
     }
 
     else {
       res.status(500).json({
-        error: 'Failed to send email'
+        error: 'Something went wrong!'
       })
     }
     
@@ -163,7 +171,9 @@ async function resendOtp(req,res) {
     const otp = generateOtp();
     const currentDate = new Date();
 
-    await prisma.users.update({
+    
+
+   const updatedUser =  await prisma.users.update({
       where: {
         id: user.id
       },
@@ -173,10 +183,28 @@ async function resendOtp(req,res) {
       }
     });
 
-    res.status(200).json({
-      success: true,
-      otp: otp
-    })
+    if(updatedUser) {
+      const mailSent = await sendMail(updatedUser.email, 'OTP', otp);
+
+    if(mailSent) {
+      res.status(200).json({
+        success: true,
+        message: 'OTP has been resent successfully'
+      })
+    }
+
+    else {
+      res.status(500).json({
+        error: 'Failed to send email'
+      })
+    }
+    }
+
+    else {
+      res.status(500).json({
+        error: 'Something went wrong'
+      })
+    }
 
   } catch (error) {
     res.status(500).json({error: error.message});
