@@ -14,6 +14,6 @@ router.post("/verify-otp", validateSchema(verifyOtpValidation) , verifyOtp);
 router.post("/resend-otp", validateSchema(resendOtpValidation), resendOtp)
 router.post("/forgot-password", forgotPasswordRequest);
 router.post("/verify-forgot-otp", validateSchema(verifyOtpValidation), verifyForgotOtp);
-router.post("/verify-forgot-otp", validateSchema(resetPasswordValidation), resetPassword);
+router.post("/reset-password", validateSchema(resetPasswordValidation), resetPassword);
 
 module.exports = router;
