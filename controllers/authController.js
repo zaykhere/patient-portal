@@ -211,9 +211,95 @@ async function resendOtp(req,res) {
   }
 }
 
+async function forgotPasswordRequest(req,res) {
+  const {email} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(400).json({error: "User not found"});
+
+    const otp = generateOtp();
+    const currentDate = new Date();
+
+   const updatedUser =  await prisma.users.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        otp: otp,
+        otp_sent_at: currentDate
+      }
+    });
+
+    if(updatedUser) {
+      const mailSent = await sendMail(updatedUser.email, 'Forgot Password Request', otp);
+
+    if(mailSent) {
+      res.status(200).json({
+        success: true,
+        message: 'OTP has been resent successfully'
+      })
+    }
+
+    else {
+      res.status(500).json({
+        error: 'Failed to send email'
+      })
+    }
+    }
+
+    else {
+      res.status(500).json({
+        error: 'Something went wrong'
+      })
+    }
+
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+}
+
+async function resetPassword(req,res) {
+  const {email, otp, password} = req.body;
+
+  try {
+    const user = await prisma.users.findFirst({
+      where: {
+        email: email
+      }
+    });
+
+    if(!user) return res.status(400).json({error: "User not found"});
+
+    if(otp == user.otp) {
+      const updatedUser =  await prisma.users.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          password
+        }
+      });
+    }
+
+    else {
+      return res.status(400).json({error: "Invalid OTP"});
+    }
+
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+}
+
 module.exports = {
   loginUser,
   registerPatient,
   verifyOtp,
-  resendOtp
+  resendOtp,
+  forgotPasswordRequest
 }

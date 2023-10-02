@@ -28,6 +28,9 @@ CREATE TABLE users (
     is_verified TINYINT DEFAULT 0,
     otp INT,
     otp_sent_at TIMESTAMP,
+    forgot_password_otp INT,
+    forgot_otp_sent_at TIMESTAMP,
+    is_forgot_otp_verified TINYINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
