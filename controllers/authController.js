@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const generateToken = require('../utils/generateToken');
 const registerDto = require('../dtos/auth/registerDto');
 const generateOtp = require('../utils/generateOtp');
+const sendMail = require('../utils/sendMail');
 
 async function loginUser(req, res) {
   const {email, password} = req.body;
@@ -84,10 +85,21 @@ async function registerPatient(req,res) {
 
     const response = registerDto(createdUser);
 
-    res.status(200).json({
-      success: true,
-      user: {...response, otp}
-    })
+    const mailSent = await sendMail(createdUser.email, 'OTP', otp);
+
+    if(mailSent) {
+      res.status(200).json({
+        success: true,
+        user: response
+      })
+    }
+
+    else {
+      res.status(500).json({
+        error: 'Failed to send email'
+      })
+    }
+    
 
   } catch (error) {
     res.status(500).json({error: error.message});
