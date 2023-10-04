@@ -19,7 +19,6 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     age INT,
     date_of_birth DATE,
-    blood_group VARCHAR(20),
     height INT,
     weight DECIMAL(3,2),
     about TEXT,
@@ -40,8 +39,38 @@ CREATE TABLE users_roles (
 	user_role_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     role_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Patient Info table
+CREATE TABLE patient_info (
+  id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  user_id INT NOT NULL,
+  blood_group VARCHAR(20),
+  height VARCHAR(10),
+  weight VARCHAR(10),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Patient Health Records table
+CREATE TABLE patient_health_records (
+  id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  user_id INT NOT NULL,
+  blood_pressure_systolic INT,
+  blood_pressure_diastolic INT,
+  pulse_rate INT,
+  temperature INT,
+  weight DECIMAL(5,2),
+  height INT,
+  anxiety_rate INT,
+  depression_rate INT,
+  waist INT,
+  head INT,
+  sugar_fasting INT,
+  sugar_random INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Appointments Table
@@ -182,5 +211,5 @@ CREATE TABLE phone_numbers (
     country_code VARCHAR(5) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

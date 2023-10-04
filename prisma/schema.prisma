@@ -135,7 +135,6 @@ model users {
   password                                         String                   @db.VarChar(255)
   age                                              Int?
   date_of_birth                                    DateTime?                @db.Date
-  blood_group                                      String?                  @db.VarChar(20)
   height                                           Int?
   weight                                           Decimal?                 @db.Decimal(3, 2)
   about                                            String?                  @db.Text
@@ -153,6 +152,8 @@ model users {
   doctor_reviews_doctor_reviews_doctor_idTousers   doctor_reviews[]         @relation("doctor_reviews_doctor_idTousers")
   doctor_reviews_doctor_reviews_patient_idTousers  doctor_reviews[]         @relation("doctor_reviews_patient_idTousers")
   medical_records                                  medical_records[]
+  patient_health_records                           patient_health_records[]
+  patient_info                                     patient_info[]
   phone_numbers                                    phone_numbers[]
   prescriptions_prescriptions_prescribed_byTousers prescriptions[]          @relation("prescriptions_prescribed_byTousers")
   prescriptions_prescriptions_prescribed_toTousers prescriptions[]          @relation("prescriptions_prescribed_toTousers")
@@ -168,7 +169,7 @@ model users_roles {
   user_role_id Int    @id @default(autoincrement())
   user_id      Int?
   role_id      Int?
-  users        users? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_roles_ibfk_1")
+  users        users? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "users_roles_ibfk_1")
   roles        roles? @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_roles_ibfk_2")
 
   @@index([role_id], map: "role_id")
@@ -208,7 +209,39 @@ model phone_numbers {
   country_code String @db.VarChar(5)
   phone        String @db.VarChar(15)
   user_id      Int
-  users        users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "phone_numbers_ibfk_1")
+  users        users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "phone_numbers_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model patient_health_records {
+  id                       Int       @id @default(autoincrement())
+  user_id                  Int
+  blood_pressure_systolic  Int?
+  blood_pressure_diastolic Int?
+  pulse_rate               Int?
+  temperature              Int?
+  weight                   Decimal?  @db.Decimal(5, 2)
+  height                   Int?
+  anxiety_rate             Int?
+  depression_rate          Int?
+  waist                    Int?
+  head                     Int?
+  sugar_fasting            Int?
+  sugar_random             Int?
+  created_at               DateTime? @default(now()) @db.Timestamp(0)
+  users                    users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "patient_health_records_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model patient_info {
+  id          Int     @id @default(autoincrement())
+  user_id     Int
+  blood_group String? @db.VarChar(20)
+  height      String? @db.VarChar(10)
+  weight      String? @db.VarChar(10)
+  users       users   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "patient_info_ibfk_1")
 
   @@index([user_id], map: "user_id")
 }
