@@ -73,6 +73,44 @@ CREATE TABLE patient_health_records (
   FOREIGN KEY (user_id) REFERENCES users(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Demographics Table
+CREATE TABLE personal_demographic (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(255),
+  last_name VARCHAR(255),
+  middle_name VARCHAR(255),
+  suffix VARCHAR(5),
+  date_of_birth DATE,
+  disability ENUM('hearing_impairment', 'visual_impairment', 'physical'),
+  country VARCHAR(20),
+  state VARCHAR(20),
+  city VARCHAR(20),
+  zip_code VARCHAR(10),
+  ssn VARCHAR(20),
+  user_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Contacts Table
+CREATE TABLE personal_contact (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  interpreter_name VARCHAR(255),
+  interpreter_relation VARCHAR(255),
+  interpreter_phone VARCHAR(20),
+  pharmacy_name VARCHAR(255),
+  pharmacy_address TEXT,
+  pharmacy_city VARCHAR(30),
+  pharmacy_zip_code VARCHAR(10),
+  pharmacy_phone VARCHAR(20),
+  emergency_contact_name VARCHAR(255),
+  emergency_relation VARCHAR(255),
+  emergency_contact_number VARCHAR(20),
+  user_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Appointments Table
 CREATE TABLE appointments (
 	id INT PRIMARY KEY NOT NULL auto_increment,
@@ -211,5 +249,6 @@ CREATE TABLE phone_numbers (
     country_code VARCHAR(5) NOT NULL,
     phone VARCHAR(15) NOT NULL,
     user_id INT NOT NULL,
+    phone_type ENUM ('cellphone', 'residence'),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -24,8 +24,10 @@ async function loginUser(req, res) {
       return res.status(400).json({error: "Invalid Credentials"});
     }
 
+    const userResponse = registerDto(user);
+
     res.status(200).json({
-      user,
+      user: userResponse,
       token: generateToken(user.id)
     });
 
